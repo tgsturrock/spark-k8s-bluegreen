@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-worker-blue
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: spark
+      role: worker
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: spark
+        role: worker
+        version: blue
+    spec:
+      containers:
+      - name: spark-worker
+        image: tgsets/spark:3.2.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8081
+        command: ["/bin/sh", "-c", "/opt/spark-worker"]

@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-master-green
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spark
+      role: master
+      version: green
+  template:
+    metadata:
+      labels:
+        app: spark
+        role: master
+        version: green
+    spec:
+      containers:
+      - name: spark-master
+        image: tgsets/spark:3.2.1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 7077
+        - containerPort: 8080
+        command: ["/bin/sh", "-c", "/opt/spark-master"]
