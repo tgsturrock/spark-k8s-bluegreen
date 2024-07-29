@@ -1,27 +1,45 @@
-# base image
+# Base image
 FROM openjdk:11
 
-# define spark and hadoop versions
+# Define Spark and Hadoop versions
 ENV SPARK_VERSION=3.2.0
 ENV HADOOP_VERSION=3.3.1
 
-# download and install hadoop
-RUN mkdir -p /opt && \
-    cd /opt && \
-    curl http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz | \
-        tar -zx hadoop-${HADOOP_VERSION}/lib/native && \
-    ln -s hadoop-${HADOOP_VERSION} hadoop && \
-    echo Hadoop ${HADOOP_VERSION} native libraries installed in /opt/hadoop/lib/native
+# Install necessary packages
+RUN apt-get update && apt-get install -y \
+    curl \
+    tar \
+    gzip \
+    && rm -rf /var/lib/apt/lists/*
 
-# download and install spark
-RUN mkdir -p /opt && \
-    cd /opt && \
-    curl http://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz | \
-        tar -zx && \
-    ln -s spark-${SPARK_VERSION}-bin-hadoop2.7 spark && \
-    echo Spark ${SPARK_VERSION} installed in /opt
+# Create directories for Spark and Hadoop
+RUN mkdir -p /opt/spark /opt/hadoop
 
-# add scripts and update spark default config
-ADD common.sh spark-master spark-worker /
-ADD spark-defaults.conf /opt/spark/conf/spark-defaults.conf
-ENV PATH $PATH:/opt/spark/bin
+# Copy downloaded files into the Docker image
+COPY hadoop-3.3.1.tar.gz /opt/hadoop/
+COPY spark-3.2.0-bin-hadoop2.7.tgz /opt/spark/
+
+# Extract Hadoop
+RUN cd /opt/hadoop && \
+    tar -zxvf hadoop-3.3.1.tar.gz --strip-components=1 && \
+    ln -s /opt/hadoop /opt/hadoop-current && \
+    echo Hadoop ${HADOOP_VERSION} installed in /opt/hadoop
+
+# Extract Spark
+RUN cd /opt/spark && \
+    tar -zxvf spark-3.2.0-bin-hadoop2.7.tgz --strip-components=1 && \
+    ln -s /opt/spark /opt/spark-current && \
+    echo Spark ${SPARK_VERSION} installed in /opt/spark
+
+# Add custom scripts and configuration
+COPY common.sh spark-master spark-worker /opt/
+COPY spark-defaults.conf /opt/spark/conf/spark-defaults.conf
+
+# Make scripts executable
+RUN chmod +x /opt/common.sh /opt/spark-master /opt/spark-worker
+
+# Set environment variables
+ENV PATH=$PATH:/opt/spark/bin
+
+# Default command
+#CMD ["/bin/bash"]

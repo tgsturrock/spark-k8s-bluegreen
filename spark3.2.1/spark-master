@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. /common.sh
+. /opt/common.sh
 
 echo "$(hostname -i) spark-master" >> /etc/hosts
 
