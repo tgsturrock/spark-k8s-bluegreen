@@ -23,3 +23,10 @@ spec:
         ports:
         - containerPort: 8081
         command: ["/bin/sh", "-c", "/opt/spark-worker"]
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "1"
+          limits:
+            memory: "2Gi"
+            cpu: "2"

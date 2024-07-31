@@ -6,6 +6,7 @@ spec:
   selector:
     app: spark
     role: master
+    version: blue
   ports:
   - name: spark
     protocol: TCP
