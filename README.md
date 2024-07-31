@@ -1,9 +1,10 @@
 # ELE796 Lab4
 
-##Images Docker pour Spark
+## Images Docker pour Spark
 
 Ce dépôt fournit des images Docker pour les versions 3.2.0 et 3.2.1 d'Apache Spark. Les images Docker sont construites en utilisant les dossiers fournis, qui contiennent les fichiers de configuration nécessaires et les archives sources.
-Structure des Répertoires
+
+### Structure des Répertoires
 
 Le dépôt contient les répertoires suivants :
 
@@ -20,7 +21,7 @@ Chaque répertoire inclut les fichiers suivants :
     spark-master : Un script pour démarrer le nœud maître Spark.
     spark-worker : Un script pour démarrer le nœud worker Spark.
 
-##Fichier lab4.sh
+## Fichier lab4.sh
 
 Le script lab4.sh est utiliser pour automatiser le déploiement et la mise à jour de Spark.Voici un aperçu des fonctionnalités de ce script :
 
