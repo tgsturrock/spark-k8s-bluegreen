@@ -1,49 +1,73 @@
-# ELE796 Lab4
 
-## Images Docker pour Spark
+# **Implementing an Apache Spark Cluster on Kubernetes with a Blue/Green Strategy**
 
-Ce dépôt fournit des images Docker pour les versions 3.2.0 et 3.2.1 d'Apache Spark. Les images Docker sont construites en utilisant les dossiers fournis, qui contiennent les fichiers de configuration nécessaires et les archives sources.
+-----
 
-### Structure des Répertoires
+## **Project Overview**
 
-Le dépôt contient les répertoires suivants :
+This project focuses on deploying and managing an **Apache Spark** cluster on **Kubernetes** using a **Blue/Green deployment strategy**. The goal is to provide a highly available and fault-tolerant system for big data processing, while also demonstrating how to update a service seamlessly without downtime.
 
-    spark3.2.0 : Contient les fichiers et configurations pour construire l'image Docker pour Spark 3.2.0.
-    spark3.2.1 : Contient les fichiers et configurations pour construire l'image Docker pour Spark 3.2.1.
+The lab involves:
 
-Chaque répertoire inclut les fichiers suivants :
+  * Building two distinct Docker images for **Apache Spark versions 3.2.0** (the "Blue" version) and **3.2.1** (the "Green" version).
+  * **Automating the deployment** of a Spark cluster on a Kubernetes environment.
+  * **Orchestrating a Blue/Green update**, where a new version of the service (Green) is deployed alongside the old version (Blue).
+  * **Switching traffic** from the old service to the new one in a controlled manner.
+  * **Cleaning up** the old version once the transition is complete and validated.
 
-    common.sh : Un script avec des commandes de configuration communes utilisées dans les Dockerfiles.
-    Dockerfile : Le Dockerfile utilisé pour construire l'image Docker.
-    hadoop-3.3.1.tar.gz : L'archive Hadoop 3.3.1 requise par Spark.
-    spark-3.2.0-bin-hadoop2.7.tgz (ou spark-3.2.1-bin-hadoop2.7.tgz) : L'archive de distribution binaire de Spark 3.2.0 (ou 3.2.1).
-    spark-defaults.conf : Le fichier de configuration Spark utilisé pour définir les propriétés par défaut de Spark.
-    spark-master : Un script pour démarrer le nœud maître Spark.
-    spark-worker : Un script pour démarrer le nœud worker Spark.
+This approach ensures service continuity and a smooth user experience, which is critical for time-sensitive big data operations.
 
-## Fichier lab4.sh
+-----
 
-Le script lab4.sh est utiliser pour automatiser le déploiement et la mise à jour de Spark.Voici un aperçu des fonctionnalités de ce script :
+## **Directory Structure**
 
-    Définition des chemins des fichiers YAML : Les chemins vers les fichiers YAML de déploiement et de service sont définis pour les versions Blue et Green de Spark.
+The repository contains the following directories and files:
 
-    Validation des déploiements : Le script vérifie que les déploiements du maître et des workers Spark sont correctement mis en place et ont le nombre souhaité de réplicas.
+  * **spark3.2.0**: Contains the necessary files to build the Docker image for Spark 3.2.0.
+  * **spark3.2.1**: Contains the necessary files to build the Docker image for Spark 3.2.1.
+  * **spark-master-deployment.yaml**: Kubernetes YAML file for deploying the Spark Master node.
+  * **spark-worker-deployment.yaml**: Kubernetes YAML file for deploying the Spark Worker nodes.
+  * **spark-master-service.yaml**: Kubernetes YAML file for creating a service to expose the Spark Master.
+  * **spark-ingress.yaml**: Kubernetes YAML file for configuring an Ingress to provide external access to the Spark web UI.
+  * **lab4.sh**: The main script to automate the entire deployment and Blue/Green update process.
+  * **test\_spark\_job.py** (or similar): A simple Python script for a test Spark job to validate functionality.
 
-    Validation du service : Le script vérifie que le service Spark Master est correctement configuré et accessible.
+Each of the `spark3.2.x` directories includes:
 
-    Déploiement de la version Blue : Le script applique les fichiers YAML pour déployer la version Blue de Spark, puis valide le déploiement et le service associés.
+  * **Dockerfile**: The instructions for building the Spark image.
+  * **spark-defaults.conf**: The default configuration for Spark.
+  * **spark-master** and **spark-worker** scripts to start the respective nodes.
+  * **apache-hadoop-3.3.1** and **apache-spark-3.2.x** archives.
 
-    Validation des Jobs Spark : Un job Spark de test est exécuté pour s'assurer que le cluster Spark fonctionne correctement.
+-----
 
-    Déploiement de la version Green : Le script applique les fichiers YAML pour déployer la version Green de Spark et valide les déploiements.
+## **The `lab4.sh` Automation Script**
 
-    Changement de la version du service : Le service est mis à jour pour pointer vers la version Green de Spark.
+The `lab4.sh` script is the core of this project, automating the entire Blue/Green deployment lifecycle on a Kubernetes cluster.
 
-    Nettoyage de la version Blue : Les ressources de la version Blue sont supprimées pour libérer de l'espace et éviter les conflits.
+**Core functionalities of the script include:**
 
-    Validation de la version Green : Le script vérifie que le job Spark fonctionne correctement avec la version Green.
+1.  **Deployment**: It first builds the **spark:3.2.0** (Blue) Docker image and applies the Kubernetes YAML files to deploy the initial Spark Master and two Worker replicas.
+2.  **Validation**: It performs checks to confirm that the Kubernetes deployments and services are running as expected. It then executes a simple **Spark job** (e.g., a word count on a short text) to validate that the Blue cluster is functional.
+3.  **Blue/Green Transition**: The script then builds the new **spark:3.2.1** (Green) image. It deploys the Green version alongside the Blue one and updates the service to redirect traffic to the new Green version.
+4.  **Cleanup**: Once the transition is successful, the script deletes the Blue version's deployments and services to free up resources.
+5.  **Final Validation**: It runs the same test Spark job on the new Green version to ensure the update was successful.
+6.  **Environment Cleanup**: Finally, the script removes all Kubernetes resources, leaving the environment in a clean state.
 
-    Nettoyage de l'environnement : Les ressources liées à la version Green et les services associés sont supprimés pour maintenir un environnement propre.
+This script demonstrates a robust, automated approach to updating critical services, ensuring a seamless and reliable transition from one version to the next.
 
-Le script assure une transition fluide entre les versions Blue et Green de Spark, tout en validant chaque étape pour garantir un déploiement réussi.
-Le script termine en nettoyant l'environnement de travail en supprimant les ressources et services.
+-----
+
+## How to use the `lab4.sh` file
+
+Before running the script, ensure you have a functional Kubernetes cluster (e.g., Microk8s) with at least two nodes configured. The `lab4.sh` script assumes you have `docker` and `kubectl` installed and configured correctly.
+
+  * To run the script and execute the full Blue/Green deployment cycle, simply use:
+
+<!-- end list -->
+
+```bash
+./lab4.sh
+```
+
+  * To clean the environment, the script includes a cleanup routine that removes all deployed services and resources.
