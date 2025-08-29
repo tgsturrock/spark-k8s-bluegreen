@@ -1,8 +1,6 @@
 
 # **Implementing an Apache Spark Cluster on Kubernetes with a Blue/Green Strategy**
 
------
-
 ## **Project Overview**
 
 This project focuses on deploying and managing an **Apache Spark** cluster on **Kubernetes** using a **Blue/Green deployment strategy**. The goal is to provide a highly available and fault-tolerant system for big data processing, while also demonstrating how to update a service seamlessly without downtime.
@@ -30,7 +28,6 @@ The repository contains the following directories and files:
   * **spark-master-service.yaml**: Kubernetes YAML file for creating a service to expose the Spark Master.
   * **spark-ingress.yaml**: Kubernetes YAML file for configuring an Ingress to provide external access to the Spark web UI.
   * **lab4.sh**: The main script to automate the entire deployment and Blue/Green update process.
-  * **test\_spark\_job.py** (or similar): A simple Python script for a test Spark job to validate functionality.
 
 Each of the `spark3.2.x` directories includes:
 
